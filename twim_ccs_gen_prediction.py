@@ -68,7 +68,8 @@ def pred_ccs_blended_cal(unk_file, cal_scheme_obj):
 
     pred_mob = pred_mob_with_root_finding_v_blend_func(mob_init_guess_arr, uncal_dict['exp_avg_vel'],
                                                    uncal_dict['mass'], uncal_dict['charge'], par1,
-                                                   cal_scheme_obj.cal_output['cal_fit_params'], exp=cal_scheme_obj.cal_mode['exp'])
+                                                   cal_scheme_obj.cal_output['cal_fit_params'], exp=cal_scheme_obj.cal_mode['exp'],
+                                                       fixa=cal_scheme_obj.cal_output['blended_fixa'])
 
     pred_ccs = calculate_ccs(uncal_dict['mass'], uncal_dict['charge'], pred_mob, cal_scheme_obj.cal_exp_cond['temperature'],
                                   cal_scheme_obj.cal_exp_cond['pressure'] / 1000, cal_scheme_obj.cal_exp_cond['gas_mass'])
@@ -245,12 +246,12 @@ if __name__ == '__main__':
 
 
 
-    unkfile = r"C:\Users\sugyan\Documents\MembraneMDfiles\Serf_tmp_model\_Exp_CCS\unk_SERF_E11T14_allcs.csv"
-    cal_object_file = r"C:\Users\sugyan\Documents\MembraneMDfiles\Serf_tmp_model\_Exp_CCS\serf_dan_cal_input_wv_200.0_wh_20.0_relax_True_terms_6_exp_True_.cal"
+    unkfile = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\test\unk_input_wv_300.0_wh_20.0.csv"
+    cal_object_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\test\nofixa_cal_input_wv_300.0_wh_20.0_blended_True_exp_True_.cal"
     uncal_out = pred_ccs_(unkfile, cal_object_file)
     #
     #
-    # cal_predict_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\Denature_Proteins\_blur_LeaveOneSpecies_CrossVal\cal_predict_files.csv"
+    # cal_predict_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\cal_predict_files.csv"
     # cal_predict_file_df = pd.read_csv(cal_predict_file)
     # for ind, (unkfile, cal_object_file) in enumerate(zip(cal_predict_file_df['unk_csv_fpath'].values, cal_predict_file_df['cal_obj_fpath'].values)):
     #     print(unkfile, ' -----> ', cal_object_file)

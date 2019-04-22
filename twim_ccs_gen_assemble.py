@@ -322,9 +322,10 @@ if __name__ == '__main__':
     # gen_assemble_cal_object_from_parser(parser)
 
 
-    cal_input_file_ = r"C:\Users\sugyan\Documents\MembraneMDfiles\Serf_tmp_model\_Exp_CCS\serf_dan_cal_input_wv_200.0_wh_20.0.csv"
+    # cal_input_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\cal_input_files.csv"
     # cal_input_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\Denature_Proteins\_blur_LeaveOneSpecies_CrossVal\cal_input_files.csv"
     ccs_db_file = r"C:\Users\sugyan\Documents\CCSCalibration\ccsdatabse_positive.csv"
+    cal_input_file_ = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\test\cal_input_wv_300.0_wh_20.0.csv"
     # list_file = read_cal_input_file(cal_input_file)
     gas_type = 'he'
     gen_assemble_cal_object(cal_input_file_, ccs_db_file, gas_type=gas_type)

@@ -284,15 +284,18 @@ def v_const_expansion_6(x, y):
 #     func = wave_vel * func1 * (1 - func2 + func3 - func4)
 #     return func
 
-def v_alpha_6_exp(X, pars):
+def v_alpha_6_exp(X, pars, fixa=True):
     """
     equation for v gamma 6
     :param alpha:
     :param gamma:
     :return:
     """
-
-    a, g, cexp = pars
+    if fixa:
+        g, cexp = pars
+        a = 1.
+    else:
+        a, g, cexp = pars
 
     mobility, mass, charge, wave_ht, wave_vel, wave_v_pot_fac, wave_lambda = X
     mass_kg = mass_da_to_kg(mass)
@@ -317,7 +320,7 @@ def v_alpha_6_exp(X, pars):
 
 
 
-def v_alpha_6(X, pars):
+def v_alpha_6(X, pars, fixa=True):
     """
     equation for v gamma 6
     :param alpha:
@@ -325,7 +328,11 @@ def v_alpha_6(X, pars):
     :return:
     """
 
-    a, g = pars
+    if fixa:
+        g = pars[0]
+        a = 1.
+    else:
+        a, g = pars
 
     mobility, mass, charge, wave_ht, wave_vel, wave_v_pot_fac, wave_lambda = X
     mass_kg = mass_da_to_kg(mass)
@@ -348,15 +355,18 @@ def v_alpha_6(X, pars):
     return func
 
 
-def v_gamma_6_exp(X, pars):
+def v_gamma_6_exp(X, pars, fixa=True):
     """
     equation for v gamma 6
     :param alpha:
     :param gamma:
     :return:
     """
-
-    a, g, cexp = pars
+    if fixa:
+        g, cexp = pars
+        a = 1.
+    else:
+        a, g, cexp = pars
 
     mobility, mass, charge, wave_ht, wave_vel, wave_v_pot_fac, wave_lambda = X
     mass_kg = mass_da_to_kg(mass)
@@ -385,7 +395,7 @@ def v_gamma_6_exp(X, pars):
 
 
 
-def v_gamma_6(X, pars):
+def v_gamma_6(X, pars, fixa=True):
     """
     equation for v gamma 6
     :param alpha:
@@ -393,7 +403,11 @@ def v_gamma_6(X, pars):
     :return:
     """
 
-    a, g = pars
+    if fixa:
+        g = pars[0]
+        a = 1.
+    else:
+        a, g = pars
 
     mobility, mass, charge, wave_ht, wave_vel, wave_v_pot_fac, wave_lambda = X
     mass_kg = mass_da_to_kg(mass)
@@ -422,7 +436,7 @@ def v_gamma_6(X, pars):
 
 
 
-def v_blend_cal_func(X, pars):
+def v_blend_cal_func(X, pars, fixa=True):
     """
     blended calibration function. a and g are fitting parameters
     :param a: fitting param
@@ -431,7 +445,11 @@ def v_blend_cal_func(X, pars):
     :return:
     """
 
-    a, g = pars
+    if fixa:
+        g = pars[0]
+        a = 1.
+    else:
+        a, g = pars
     mobility, mass, charge, wave_ht, wave_vel, wave_v_pot_fac, wave_lambda = X
     mass_kg = mass_da_to_kg(mass)
     charge_q = charge * 1.6e-19
@@ -441,8 +459,8 @@ def v_blend_cal_func(X, pars):
     red_alpha = a * alpha_nominal
     red_gamma = g * gamma_nominal
 
-    alpha_func = v_alpha_6(X, pars)
-    gamm_func = v_gamma_6(X, pars)
+    alpha_func = v_alpha_6(X, pars, fixa=fixa)
+    gamm_func = v_gamma_6(X, pars, fixa=fixa)
 
     weight_v_alpha_6 = (red_gamma ** 12) / (red_alpha ** 8 + red_gamma ** 12)
     weight_v_gamma_6 = (red_alpha ** 8) / (red_alpha ** 8 + red_gamma ** 12)
@@ -452,7 +470,7 @@ def v_blend_cal_func(X, pars):
     return y
 
 
-def v_blend_exp_cal_func(X, pars):
+def v_blend_exp_cal_func(X, pars, fixa=True):
     """
         blended calibration function with exp term. a and g are fitting parameters
         :param a: fitting param
@@ -461,8 +479,11 @@ def v_blend_exp_cal_func(X, pars):
         :param X: mobility, mass, and charge of the ion
         :return:
         """
-
-    a, g, cexp = pars
+    if fixa:
+        g, cexp = pars
+        a = 1.
+    else:
+        a, g, cexp = pars
     mobility, mass, charge, wave_ht, wave_vel, wave_v_pot_fac, wave_lambda = X
     mass_kg = mass_da_to_kg(mass)
     charge_q = charge * 1.6e-19
@@ -472,8 +493,8 @@ def v_blend_exp_cal_func(X, pars):
     red_alpha = a * alpha_nominal
     red_gamma = g * gamma_nominal
 
-    alpha_func = v_alpha_6_exp(X, pars)
-    gamm_func = v_gamma_6_exp(X, pars)
+    alpha_func = v_alpha_6_exp(X, pars, fixa=fixa)
+    gamm_func = v_gamma_6_exp(X, pars, fixa=fixa)
 
     weight_v_alpha_6 = (red_gamma ** 12) / (red_alpha ** 8 + red_gamma ** 12)
     weight_v_gamma_6 = (red_alpha ** 8) / (red_alpha ** 8 + red_gamma ** 12)
@@ -483,7 +504,7 @@ def v_blend_exp_cal_func(X, pars):
     return y
 
 
-def v_blend_exp_root_finding_func(mobility, vel, mass, charge, par1, fit_params):
+def v_blend_exp_root_finding_func(mobility, vel, mass, charge, par1, fit_params, fixa=True):
     """
     root finding function to obtain mobility of the ion
     :param mob: mob
@@ -492,7 +513,11 @@ def v_blend_exp_root_finding_func(mobility, vel, mass, charge, par1, fit_params)
     """
     wave_ht, wave_vel, wave_v_pot_fac, wave_lambda = par1
     X = (mobility, mass, charge, wave_ht, wave_vel, wave_v_pot_fac, wave_lambda)
-    a, g, cexp = fit_params
+    if fixa:
+        g, cexp = fit_params
+        a = 1.
+    else:
+        a, g, cexp = fit_params
     mass_kg = mass_da_to_kg(mass)
     charge_q = charge * 1.6e-19
     wave_potential = wave_ht * wave_v_pot_fac
@@ -501,8 +526,8 @@ def v_blend_exp_root_finding_func(mobility, vel, mass, charge, par1, fit_params)
     red_alpha = a * alpha_nominal
     red_gamma = g * gamma_nominal
 
-    alpha_func = v_alpha_6_exp(X, fit_params)
-    gamm_func = v_gamma_6_exp(X, fit_params)
+    alpha_func = v_alpha_6_exp(X, fit_params, fixa=fixa)
+    gamm_func = v_gamma_6_exp(X, fit_params, fixa=fixa)
 
     weight_v_alpha_6 = (red_gamma ** 12) / (red_alpha ** 8 + red_gamma ** 12)
     weight_v_gamma_6 = (red_alpha ** 8) / (red_alpha ** 8 + red_gamma ** 12)
@@ -514,7 +539,7 @@ def v_blend_exp_root_finding_func(mobility, vel, mass, charge, par1, fit_params)
 
 
 
-def v_blend_root_finding_func(mobility, vel, mass, charge, par1, fit_params):
+def v_blend_root_finding_func(mobility, vel, mass, charge, par1, fit_params, fixa=True):
     """
     root finding function to obtain mobility of the ion
     :param mob: mob
@@ -523,7 +548,11 @@ def v_blend_root_finding_func(mobility, vel, mass, charge, par1, fit_params):
     """
     wave_ht, wave_vel, wave_v_pot_fac, wave_lambda = par1
     X = (mobility, mass, charge, wave_ht, wave_vel, wave_v_pot_fac, wave_lambda)
-    a, g = fit_params
+    if fixa:
+        g = fit_params[0]
+        a = 1.
+    else:
+        a, g = fit_params
     mass_kg = mass_da_to_kg(mass)
     charge_q = charge * 1.6e-19
     wave_potential = wave_ht * wave_v_pot_fac
@@ -532,8 +561,8 @@ def v_blend_root_finding_func(mobility, vel, mass, charge, par1, fit_params):
     red_alpha = a * alpha_nominal
     red_gamma = g * gamma_nominal
 
-    alpha_func = v_alpha_6(X, fit_params)
-    gamm_func = v_gamma_6(X, fit_params)
+    alpha_func = v_alpha_6(X, fit_params, fixa=fixa)
+    gamm_func = v_gamma_6(X, fit_params, fixa=fixa)
 
     weight_v_alpha_6 = (red_gamma ** 12) / (red_alpha ** 8 + red_gamma ** 12)
     weight_v_gamma_6 = (red_alpha ** 8) / (red_alpha ** 8 + red_gamma ** 12)
@@ -544,8 +573,8 @@ def v_blend_root_finding_func(mobility, vel, mass, charge, par1, fit_params):
 
 
 
-def minimize_v_gamma_alpha_blended(pars, X, y, cal_fun):
-    y_fit = cal_fun(X, pars)
+def minimize_v_gamma_alpha_blended(pars, X, y, cal_fun, fixa=True):
+    y_fit = cal_fun(X, pars, fixa=fixa)
     err = (y-y_fit)/y_fit
     return err**2
 

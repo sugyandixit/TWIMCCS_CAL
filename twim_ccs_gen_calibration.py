@@ -83,7 +83,7 @@ def gen_calibrant_list_from_assemble_obj(assemble_obj):
 
 
 
-def create_cal_fit_dict(xdata, ydata, cal_fit_obj, cal_fit_obj_score, cal_fit_params, cal_fit_pcov, linreg_true_pred,
+def create_cal_fit_dict(xdata, ydata, cal_fit_obj, cal_fit_obj_score, cal_fit_params, blended_fixa, cal_fit_pcov, linreg_true_pred,
                         pub_ccs, pub_corr_ccs, mobility, pred_vel, pred_ccs, pred_corr_ccs, pred_mobility, vel_deviation,
                         ccs_deviation, vel_rmse, ccs_rmse):
     """
@@ -111,6 +111,7 @@ def create_cal_fit_dict(xdata, ydata, cal_fit_obj, cal_fit_obj_score, cal_fit_pa
     cal_fit_dict['cal_fit_obj'] = cal_fit_obj
     cal_fit_dict['cal_fit_obj_score'] = cal_fit_obj_score
     cal_fit_dict['cal_fit_params'] = cal_fit_params
+    cal_fit_dict['blended_fixa'] = blended_fixa
     cal_fit_dict['cal_fit_pcov'] = cal_fit_pcov
     cal_fit_dict['linreg_true_pred'] = linreg_true_pred
     cal_fit_dict['pub_ccs'] = pub_ccs
@@ -359,7 +360,8 @@ def pred_corr_ccs_with_root_finding_relax_with_exp(popt, corr_ccs, mass_over_cha
 
 
 
-def pred_mob_with_root_finding_v_blend_func(mobility_arr, exp_vel_arr, mass_arr, charge_arr, par1, fit_params, exp=False):
+def pred_mob_with_root_finding_v_blend_func(mobility_arr, exp_vel_arr, mass_arr, charge_arr, par1, fit_params,
+                                            exp=False, fixa=True):
     """
     use the root finding to find solution to determine mobility
     :param mobility: mobility array from experiment. This will be used for initial guess in root finding function
@@ -370,14 +372,27 @@ def pred_mob_with_root_finding_v_blend_func(mobility_arr, exp_vel_arr, mass_arr,
     :param fit_params: fit params from least sq (least_squares.x)
     :return: pred mobility array
     """
+
+
     pred_mob = []
     for ind, (mobility, mass, charge, exp_vel) in enumerate(zip(mobility_arr, mass_arr, charge_arr, exp_vel_arr)):
         init_guess = mobility
-        input_args = (exp_vel, mass, charge, par1, fit_params)
+        # input_args = (exp_vel, mass, charge, par1, fit_params, fixa)
         if not exp:
+            if fixa:
+                fit_params_ = fit_params[1]
+            else:
+                fit_params_ = fit_params
+            input_args = (exp_vel, mass, charge, par1, fit_params_, fixa)
             sol = root(calibration_functions.v_blend_root_finding_func, x0=init_guess, args=input_args)
             pred_mob.append(sol.x[0])
+
         else:
+            if fixa:
+                fit_params_ = fit_params[1:]
+            else:
+                fit_params_ = fit_params
+            input_args = (exp_vel, mass, charge, par1, fit_params_, fixa)
             sol = root(calibration_functions.v_blend_exp_root_finding_func, x0=init_guess, args=input_args)
             pred_mob.append(sol.x[0])
     pred_mob = np.array(pred_mob)
@@ -426,6 +441,7 @@ def generate_w_wo_relax_without_exp(assemble_object, relax=True, terms=6):
                                        cal_fit_obj=lin_reg_fit_obj,
                                        cal_fit_obj_score=lin_reg_fit_score,
                                        cal_fit_params=None,
+                                       blended_fixa=None,
                                        cal_fit_pcov=None,
                                        linreg_true_pred=lin_reg_exp_pred_vel,
                                        pub_ccs=assemble_object.ccs,
@@ -495,6 +511,7 @@ def generate_relax_with_exp_with_mass(assemble_object, terms=6):
                                        cal_fit_obj=None,
                                        cal_fit_obj_score=None,
                                        cal_fit_params=popt,
+                                       blended_fixa=None,
                                        cal_fit_pcov=pcov,
                                        linreg_true_pred=lin_reg_exp_pred_vel,
                                        pub_ccs=assemble_object.ccs,
@@ -562,6 +579,7 @@ def generate_relax_with_exp(assemble_object, terms=6):
                                        cal_fit_obj=None,
                                        cal_fit_obj_score=None,
                                        cal_fit_params=popt,
+                                       blended_fixa=None,
                                        cal_fit_pcov=pcov,
                                        linreg_true_pred=lin_reg_exp_pred_vel,
                                        pub_ccs=assemble_object.ccs,
@@ -669,6 +687,7 @@ def generate_power_fit_cal_exp_mass(assemble_object, exp=False):
                                        cal_fit_obj=None,
                                        cal_fit_obj_score=None,
                                        cal_fit_params=popt,
+                                       blended_fixa=None,
                                        cal_fit_pcov=pcov,
                                        linreg_true_pred=lin_reg_exp_pred_vel,
                                        pub_ccs=assemble_object.ccs,
@@ -742,6 +761,7 @@ def generate_power_fit_cal(assemble_object, exp=False):
                                        cal_fit_obj=None,
                                        cal_fit_obj_score=None,
                                        cal_fit_params=popt,
+                                       blended_fixa=None,
                                        cal_fit_pcov=pcov,
                                        linreg_true_pred=lin_reg_exp_pred_vel,
                                        pub_ccs=assemble_object.ccs,
@@ -775,7 +795,7 @@ def generate_power_fit_cal(assemble_object, exp=False):
     return cal_scheme
 
 
-def generate_blended_cal(assemble_object, exp=False):
+def generate_blended_cal(assemble_object, exp=False, fixa=True):
     """
     generate blended calibration
     :param assemble_object: assemble object from twim_ccs_calibration_assemble_2 py
@@ -794,19 +814,54 @@ def generate_blended_cal(assemble_object, exp=False):
 
 
     if not exp:
-        v_blend_least_sq = least_squares(calibration_functions.minimize_v_gamma_alpha_blended, x0=[0.5, 0.5],
-                                       args=(x_, y_, calibration_functions.v_blend_cal_func), method='lm')
-        pred_velocity = calibration_functions.v_blend_cal_func(x_, v_blend_least_sq.x)
-        pred_mob = pred_mob_with_root_finding_v_blend_func(assemble_object.mobility, y_, assemble_object.mass,
-                                                           assemble_object.charge, x_[3:], v_blend_least_sq.x, exp=exp)
-    else:
-        v_blend_least_sq = least_squares(calibration_functions.minimize_v_gamma_alpha_blended, x0=[0.5, 0.5, 0.5],
-                                         args=(x_, y_, calibration_functions.v_blend_exp_cal_func), method='lm')
-        pred_velocity = calibration_functions.v_blend_exp_cal_func(x_, v_blend_least_sq.x)
-        pred_mob = pred_mob_with_root_finding_v_blend_func(assemble_object.mobility, y_, assemble_object.mass,
-                                                           assemble_object.charge, x_[3:], v_blend_least_sq.x, exp=exp)
+        if fixa:
+            x0 = [0.5]
+        else:
+            x0 = [0.5, 0.5]
 
-    pred_ccs = calculate_ccs(assemble_object.mass, assemble_object.charge, pred_mob, assemble_object.temp, assemble_object.pressure/1000, assemble_object.gas_mass)
+        v_blend_least_sq = least_squares(calibration_functions.minimize_v_gamma_alpha_blended, x0=x0,
+                                       args=(x_, y_, calibration_functions.v_blend_cal_func, fixa), method='lm')
+        if fixa:
+            fit_params_ = [1, v_blend_least_sq.x[0]]
+            pred_mob = pred_mob_with_root_finding_v_blend_func(assemble_object.mobility, y_, assemble_object.mass,
+                                                               assemble_object.charge, x_[3:], fit_params_,
+                                                               exp=exp, fixa=fixa)
+            pred_velocity = calibration_functions.v_blend_cal_func(x_, fit_params_, fixa=fixa)
+        else:
+            fit_params_ = v_blend_least_sq.x
+            pred_mob = pred_mob_with_root_finding_v_blend_func(assemble_object.mobility, y_, assemble_object.mass,
+                                                               assemble_object.charge, x_[3:], fit_params_,
+                                                               exp=exp, fixa=fixa)
+            pred_velocity = calibration_functions.v_blend_cal_func(x_, fit_params_, fixa=fixa)
+
+
+    else:
+        if fixa:
+            x0 = [0.5,0.5]
+        else:
+            x0 = [0.5, 0.5, 0.5]
+
+        v_blend_least_sq = least_squares(calibration_functions.minimize_v_gamma_alpha_blended, x0=x0,
+                                         args=(x_, y_, calibration_functions.v_blend_exp_cal_func, fixa), method='lm')
+
+
+
+        if fixa:
+            fit_params_ = [1, *v_blend_least_sq.x]
+            pred_velocity = calibration_functions.v_blend_exp_cal_func(x_, fit_params_, fixa=fixa)
+            pred_mob = pred_mob_with_root_finding_v_blend_func(assemble_object.mobility, y_, assemble_object.mass,
+                                                               assemble_object.charge, x_[3:], fit_params_,
+                                                               exp=exp, fixa=fixa)
+        else:
+            fit_params_ = v_blend_least_sq.x
+            pred_velocity = calibration_functions.v_blend_exp_cal_func(x_, fit_params_, fixa=fixa)
+            pred_mob = pred_mob_with_root_finding_v_blend_func(assemble_object.mobility, y_, assemble_object.mass,
+                                                               assemble_object.charge, x_[3:], fit_params_,
+                                                               exp=exp, fixa=fixa)
+
+
+    pred_ccs = calculate_ccs(assemble_object.mass, assemble_object.charge, pred_mob, assemble_object.temp,
+                             assemble_object.pressure / 1000, assemble_object.gas_mass)
     pred_corr_ccs = correct_ccs(pred_ccs, assemble_object.charge, assemble_object.reduce_mass)
 
     lin_reg_exp_pred_vel = linregress(y_, pred_velocity)
@@ -817,11 +872,13 @@ def generate_blended_cal(assemble_object, exp=False):
     ccs_rmse = rms_error(pred_ccs, assemble_object.ccs)
     vel_rmse = rms_error(pred_velocity, y_)
 
+
     cal_fit_dict = create_cal_fit_dict(xdata=x_,
                                        ydata=y_,
                                        cal_fit_obj=v_blend_least_sq,
                                        cal_fit_obj_score=None,
-                                       cal_fit_params=v_blend_least_sq.x,
+                                       cal_fit_params=fit_params_,
+                                       blended_fixa=fixa,
                                        cal_fit_pcov=None,
                                        linreg_true_pred=lin_reg_exp_pred_vel,
                                        pub_ccs=assemble_object.ccs,
@@ -1105,7 +1162,7 @@ def write_calfit_output(cal_scheme_obj):
 
 
 
-def gen_calibration_scheme(assemble_obj_file, cal_mode):
+def gen_calibration_scheme(assemble_obj_file, cal_mode, fixa_blended=False):
     """
     generate cal scheme object and save it. generate cal ouputs and save them.
     :param assemble_obj_file: assemble file
@@ -1132,9 +1189,9 @@ def gen_calibration_scheme(assemble_obj_file, cal_mode):
     if cal_mode == 'relax_true_6_exp':
         cal_scheme = generate_relax_with_exp(assemble_obj, terms=6)
     if cal_mode == 'blended':
-        cal_scheme = generate_blended_cal(assemble_obj, exp=False)
+        cal_scheme = generate_blended_cal(assemble_obj, exp=False, fixa=fixa_blended)
     if cal_mode == 'blended_exp':
-        cal_scheme = generate_blended_cal(assemble_obj, exp=True)
+        cal_scheme = generate_blended_cal(assemble_obj, exp=True, fixa=fixa_blended)
 
     write_calibrants_output_to_csv(cal_scheme)
     write_calfit_output(cal_scheme)
@@ -1181,18 +1238,19 @@ if __name__ == '__main__':
     # scheme = gen_calibration_scheme(assemble_file, cal_mode='relax_true_6_exp')
 
 
-    dirpath = r"C:\Users\sugyan\Documents\MembraneMDfiles\Serf_tmp_model\_Exp_CCS"
+    dirpath = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\test"
 
     sys.stdout = open(os.path.join(dirpath, 'gen_cal_log.txt'), 'w')
 
     file_list = os.listdir(dirpath)
     assemble_file_list = [x for x in file_list if x.endswith('.assemble')]
     # cal_mode_list = ['power_law', 'power_law_exp', 'relax_true_6','relax_true_6_exp', 'blended', 'blended_exp']
-    cal_mode_list = ['blended']
+    # cal_mode_list = ['power_law', 'power_law_exp', 'blended', 'blended_exp']
+    cal_mode_list = ['blended_exp']
     start_time_tot = time.perf_counter()
     for assemble_file in assemble_file_list:
-        for cal_mode in cal_mode_list:
+        for ind, cal_mode in enumerate(cal_mode_list):
             print(assemble_file, ' ---> ', cal_mode)
-            scheme = gen_calibration_scheme(os.path.join(dirpath, assemble_file), cal_mode=cal_mode)
+            scheme = gen_calibration_scheme(os.path.join(dirpath, assemble_file), cal_mode=cal_mode, fixa_blended=True)
     end_time_tot = time.perf_counter() - start_time_tot
     print('Total time took:', end_time_tot, ' seconds')
