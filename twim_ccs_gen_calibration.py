@@ -1162,7 +1162,7 @@ def write_calfit_output(cal_scheme_obj):
 
 
 
-def gen_calibration_scheme(assemble_obj_file, cal_mode, fixa_blended=False):
+def gen_calibration_scheme(assemble_obj_file, cal_mode, fixa_blended=True):
     """
     generate cal scheme object and save it. generate cal ouputs and save them.
     :param assemble_obj_file: assemble file
