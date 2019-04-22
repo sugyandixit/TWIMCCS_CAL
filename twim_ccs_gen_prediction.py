@@ -241,16 +241,22 @@ def parser_commands():
 
 
 if __name__ == '__main__':
-    # parser = parser_commands()
-    # prediction_from_parser(parser)
+    parser = parser_commands()
+    prediction_from_parser(parser)
+
+    ## examples of manual data input below
+    ###
+
+    # using a single unknown and cal object file
 
 
-
-    unkfile = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\test\unk_input_wv_300.0_wh_20.0.csv"
-    cal_object_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\test\nofixa_cal_input_wv_300.0_wh_20.0_blended_True_exp_True_.cal"
-    uncal_out = pred_ccs_(unkfile, cal_object_file)
+    # unkfile = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\test\unk_input_wv_300.0_wh_20.0.csv"
+    # cal_object_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\test\nofixa_cal_input_wv_300.0_wh_20.0_blended_True_exp_True_.cal"
+    # uncal_out = pred_ccs_(unkfile, cal_object_file)
     #
-    #
+
+    # using a list of pair of unk file and cal object file stored in csv
+
     # cal_predict_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\cal_predict_files.csv"
     # cal_predict_file_df = pd.read_csv(cal_predict_file)
     # for ind, (unkfile, cal_object_file) in enumerate(zip(cal_predict_file_df['unk_csv_fpath'].values, cal_predict_file_df['cal_obj_fpath'].values)):

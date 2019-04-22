@@ -318,18 +318,25 @@ def parser_commands():
 
 
 if __name__ == '__main__':
-    # parser = parser_commands()
-    # gen_assemble_cal_object_from_parser(parser)
+    parser = parser_commands()
+    gen_assemble_cal_object_from_parser(parser)
 
+
+    ## examples of manual data input below
+    ###
+
+    # using a single input file
+
+    # ccs_db_file = r"C:\Users\sugyan\Documents\CCSCalibration\ccsdatabse_positive.csv"
+    # cal_input_file_ = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\test\cal_input_wv_300.0_wh_20.0.csv"
+    # gas_type = 'he'
+    # gen_assemble_cal_object(cal_input_file_, ccs_db_file, gas_type=gas_type)
+
+
+    # using a list of input files listed in a csv file. Input files are in each row
 
     # cal_input_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\cal_input_files.csv"
-    # cal_input_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\Denature_Proteins\_blur_LeaveOneSpecies_CrossVal\cal_input_files.csv"
-    ccs_db_file = r"C:\Users\sugyan\Documents\CCSCalibration\ccsdatabse_positive.csv"
-    cal_input_file_ = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\test\cal_input_wv_300.0_wh_20.0.csv"
     # list_file = read_cal_input_file(cal_input_file)
-    gas_type = 'he'
-    gen_assemble_cal_object(cal_input_file_, ccs_db_file, gas_type=gas_type)
-
     # for file in list_file:
     #     print(file)
     #     gen_assemble_cal_object(file, ccs_db_file, gas_type='n2')

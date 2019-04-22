@@ -1227,30 +1227,31 @@ def parser_commands():
 
 if __name__ == '__main__':
 
-    # parser = parser_commands()
-    # gen_calibration_from_parser(parser)
+    parser = parser_commands()
+    gen_calibration_from_parser(parser)
+
+    ## examples of manual data input below
+    ###
+
+    # using a single input assemble file and single cal type
 
     # assemble_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\cal_input_wv_300.0_wh_20.0.assemble"
     # cal_scheme = gen_calibration_scheme(assemble_file, 'blended')
 
 
-    # assemble_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\Denature_Proteins\LeaveOneSpecies_CrossVal\input_ubiquitin_denat_1_wv_1000.0_wh_35.0.assemble"
-    # scheme = gen_calibration_scheme(assemble_file, cal_mode='relax_true_6_exp')
+    # using a list of cal mode list to all assemble files in a directory
 
-
-    dirpath = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\test"
-
-    sys.stdout = open(os.path.join(dirpath, 'gen_cal_log.txt'), 'w')
-
-    file_list = os.listdir(dirpath)
-    assemble_file_list = [x for x in file_list if x.endswith('.assemble')]
+    # dirpath = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\test"
+    #
+    # sys.stdout = open(os.path.join(dirpath, 'gen_cal_log.txt'), 'w')
+    #
+    # file_list = os.listdir(dirpath)
+    # assemble_file_list = [x for x in file_list if x.endswith('.assemble')]
     # cal_mode_list = ['power_law', 'power_law_exp', 'relax_true_6','relax_true_6_exp', 'blended', 'blended_exp']
-    # cal_mode_list = ['power_law', 'power_law_exp', 'blended', 'blended_exp']
-    cal_mode_list = ['blended_exp']
-    start_time_tot = time.perf_counter()
-    for assemble_file in assemble_file_list:
-        for ind, cal_mode in enumerate(cal_mode_list):
-            print(assemble_file, ' ---> ', cal_mode)
-            scheme = gen_calibration_scheme(os.path.join(dirpath, assemble_file), cal_mode=cal_mode, fixa_blended=True)
-    end_time_tot = time.perf_counter() - start_time_tot
-    print('Total time took:', end_time_tot, ' seconds')
+    # start_time_tot = time.perf_counter()
+    # for assemble_file in assemble_file_list:
+    #     for ind, cal_mode in enumerate(cal_mode_list):
+    #         print(assemble_file, ' ---> ', cal_mode)
+    #         scheme = gen_calibration_scheme(os.path.join(dirpath, assemble_file), cal_mode=cal_mode, fixa_blended=True)
+    # end_time_tot = time.perf_counter() - start_time_tot
+    # print('Total time took:', end_time_tot, ' seconds')
