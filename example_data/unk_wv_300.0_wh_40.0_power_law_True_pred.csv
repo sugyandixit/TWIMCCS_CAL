@@ -1,0 +1,15 @@
+#power_law_True_
+#Waveht,40.0
+#Wavevel,300.0
+#Gas_mass,28
+#Gas_type,n2
+#Pressure,3.4
+#Temperature,298.0
+#TWIM_length,0.254
+#EDC,1.57
+#Pot_Factor,0.41675
+#Wave_lambda,0.012
+#CCS_RMSE(%),4.070451350528459
+#id,oligomer,mass,charge,dt,exp_avg_vel,pred_mob,pred_ccs
+transthyretin,4,56000.0,14,19.37001795862448,13.611477305629132,0.023949432423013034,38.47758443357272
+transthyretin,4,56000.0,15,17.295605147309075,15.310726465285708,0.02490077952063303,39.65092341052376
