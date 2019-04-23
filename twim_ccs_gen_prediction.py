@@ -250,8 +250,8 @@ if __name__ == '__main__':
     # using a single unknown and cal object file
 
 
-    # unkfile = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\test\unk_input_wv_300.0_wh_20.0.csv"
-    # cal_object_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\test\nofixa_cal_input_wv_300.0_wh_20.0_blended_True_exp_True_.cal"
+    # unkfile = r"C:\Users\sugyan\Documents\CCSCalibration\Calib_code_test\InputFiles\unk_wv_300.0_wh_40.0.csv"
+    # cal_object_file = r"C:\Users\sugyan\Documents\CCSCalibration\Calib_code_test\InputFiles\nofixa_input_wv_300.0_wh_40.0_blended_True_exp_True_.cal"
     # uncal_out = pred_ccs_(unkfile, cal_object_file)
     #
 
