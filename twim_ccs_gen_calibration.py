@@ -380,7 +380,7 @@ def pred_mob_with_root_finding_v_blend_func(mobility_arr, exp_vel_arr, mass_arr,
         # input_args = (exp_vel, mass, charge, par1, fit_params, fixa)
         if not exp:
             if fixa:
-                fit_params_ = fit_params[1]
+                fit_params_ = [fit_params[1]]
             else:
                 fit_params_ = fit_params
             input_args = (exp_vel, mass, charge, par1, fit_params_, fixa)
@@ -848,7 +848,7 @@ def generate_blended_cal(assemble_object, exp=False, fixa=True):
 
         if fixa:
             fit_params_ = [1, *v_blend_least_sq.x]
-            pred_velocity = calibration_functions.v_blend_exp_cal_func(x_, fit_params_, fixa=fixa)
+            pred_velocity = calibration_functions.v_blend_exp_cal_func(x_, v_blend_least_sq.x, fixa=fixa)
             pred_mob = pred_mob_with_root_finding_v_blend_func(assemble_object.mobility, y_, assemble_object.mass,
                                                                assemble_object.charge, x_[3:], fit_params_,
                                                                exp=exp, fixa=fixa)
@@ -1162,7 +1162,7 @@ def write_calfit_output(cal_scheme_obj):
 
 
 
-def gen_calibration_scheme(assemble_obj_file, cal_mode, fixa_blended=True):
+def gen_calibration_scheme(assemble_obj_file, cal_mode, fixa_blended=False):
     """
     generate cal scheme object and save it. generate cal ouputs and save them.
     :param assemble_obj_file: assemble file
@@ -1215,7 +1215,7 @@ def gen_calibration_from_parser(parser):
 
 def parser_commands():
     parser = optparse.OptionParser(description='Creates calibration file from the assemble file')
-    parser.add_option('-i', '--inputf', dest='inputf', default='assemblefile.assemble', help='assemble file input type .assemble')
+    parser.add_option('-i', '--inputf', dest='inputf', default='example_data\input_wv_300.0_wh_40.0.assemble', help='assemble file input type .assemble')
     parser.add_option('-c', '--cal_type', dest='cal_type', default='blended_exp', help='cal_type options: power_law, '
                                                                                  'power_law_exp,'
                                                                                  'relax_true_6,'
@@ -1235,8 +1235,8 @@ if __name__ == '__main__':
 
     # using a single input assemble file and single cal type
 
-    # assemble_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\cal_input_wv_300.0_wh_20.0.assemble"
-    # cal_scheme = gen_calibration_scheme(assemble_file, 'blended')
+    # assemble_file = r"C:\Users\sugyan\Documents\CCSCalibration\Calib_code_test\InputFiles\input_wv_300.0_wh_40.0.assemble"
+    # cal_scheme = gen_calibration_scheme(assemble_file, 'blended_exp')
 
 
     # using a list of cal mode list to all assemble files in a directory
