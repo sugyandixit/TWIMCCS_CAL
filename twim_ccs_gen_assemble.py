@@ -309,9 +309,9 @@ def gen_assemble_cal_object_from_parser(parser):
 
 def parser_commands():
     parser = optparse.OptionParser(description='Creates an assemble file ready to generate calibration scheme')
-    parser.add_option('-i' ,'--inputf', dest='inputf', default=r'InputFiles\input_wv_300.0_wh_40.0.csv',
-                      help='csv input file that contain the calibration input file. See template_cal_input.csv file for more info')
-    parser.add_option('-c', '--ccs_db', dest='ccs_db', default=r"CCSDatabase\ccsdatabse_positive.csv",
+    parser.add_option('-i' ,'--inputf', dest='inputf', default='example_data\input_wv_300.0_wh_40.0.csv',
+                      help='csv input file that contains the calibration input. See example_data\input_wv_300.0_wh_40.0.csv file for more info')
+    parser.add_option('-c', '--ccs_db', dest='ccs_db', default='CCSDatabase\ccsdatabse_positive.csv',
                       help='csv ccs database file. See ccsdatabase_positive.csv and ccsdatabse_negative.csv for examples')
     parser.add_option('-g', '--gas_type', dest='gas_type', default='n2', help='gas type for calibration. Either n2 or he')
     return parser
