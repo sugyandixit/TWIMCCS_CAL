@@ -123,36 +123,8 @@ def read_ccs_database(ccsdatabase_file):
     :param ccsdatabase_file:
     :return: ccs_database_object
     """
-
-    ccs_db_obj = CCSDatabase()
-    ccs_db = pd.read_csv(ccsdatabase_file)
-    ccs_db_obj.molecule_id = ccs_db['id'].values
-    ccs_db_obj.n_oligomer = ccs_db['n_oligomers'].values
-    ccs_db_obj.mass = ccs_db['mass'].values
-    ccs_db_obj.charge = ccs_db['z'].values
-    ccs_db_obj.ccs_he = ccs_db['ccs_he'].values
-    ccs_db_obj.ccs_n2 = ccs_db['ccs_n2'].values
-
-    return ccs_db_obj
-
-
-class CCSDatabase(object):
-    """
-    store the ccs database
-    """
-
-    def __init__(self):
-        """
-        initialize the object
-        have molecule id, oligomer number, mass, charge, ccs_he, and ccs_n2 information store
-        """
-
-        self.molecule_id = None
-        self.n_oligomer = None
-        self.mass = None
-        self.charge = None
-        self.ccs_he = None
-        self.ccs_n2 = None
+    ccs_db_df = pd.read_csv(ccsdatabase_file)
+    return ccs_db_df
 
 
 class AssembleCalibrants(object):
@@ -160,9 +132,9 @@ class AssembleCalibrants(object):
     store the input needed for calibration
     """
 
-    def __init__(self, cal_input_fpath, ccs_db_obj, gas_type):
+    def __init__(self, cal_input_fpath, ccs_db_df, gas_type):
         self.cal_input_csv = cal_input_fpath
-        self.ccs_db_object = ccs_db_obj
+        self.ccs_db_df = ccs_db_df
         self.gas_type = gas_type
         self.temp = None
         self.twim_length = None
@@ -177,6 +149,8 @@ class AssembleCalibrants(object):
         self.oligomer = None
         self.mass = None
         self.charge = None
+        self.superclass = None
+        self.subclass = None
         self.mass_over_charge = None
         self.reduce_mass = None
         self.edc_constant = None
@@ -223,27 +197,38 @@ class AssembleCalibrants(object):
                         temperature.append(float(line.split(',')[1]))
                     if line.find('TWIM_length') == 1:
                         tw_length.append(float(line.split(',')[1]))
-                else:
-                    line_chars = line.split(',')
-                    species_id.append(line_chars[0])
-                    oligomer.append(int(line_chars[1]))
-                    mass.append(float(line_chars[2]))
-                    charge.append(int(line_chars[3]))
-                    drift_time.append(float(line_chars[4]))
-                    index_to_ccs = np.where(
-                        (self.ccs_db_object.molecule_id == line_chars[0]) & (self.ccs_db_object.n_oligomer == int(line_chars[1])) & (
-                                    self.ccs_db_object.charge == int(line_chars[3])))
-                    index_to_ccs = index_to_ccs[0]
-                    if self.gas_type == 'n2':
-                        ccs_pub.append(self.ccs_db_object.ccs_n2[index_to_ccs])
-                        gas_mass = 28
-                    if self.gas_type == 'he':
-                        ccs_pub.append(self.ccs_db_object.ccs_he[index_to_ccs])
-                        gas_mass = 4
-                    if self.gas_type == None:
-                        print('Error: gas_type = None | specify gas type (he or n2)')
-                        break
 
+        # store information from input file
+        data_frame = pd.read_csv(self.cal_input_csv, header=8)
+        self.species = data_frame['#id'].values
+        self.oligomer = data_frame['oligomer'].values
+        self.mass = data_frame['mass'].values
+        self.charge = data_frame['charge'].values
+        self.drift_time = data_frame['dt'].values
+
+        if 'superclass' in data_frame:
+            self.superclass = data_frame['superclass'].values
+        if 'subclass' in data_frame:
+            self.subclass = data_frame['subclass'].values
+
+        #match ccs value and entry based on the gas type, species, oligomer, and charge
+        gas_mass = 0
+        ccs_db_label = ''
+        if self.gas_type == 'n2':
+            gas_mass += 28
+            ccs_db_label = 'ccs_n2'
+        if self.gas_type == 'he':
+            gas_mass += 4
+            ccs_db_label = 'ccs_he'
+        if self.gas_type == None:
+            print('Error: gas_type = None | specify gas type (he or n2)')
+
+        for index, (species_, oligo_, charge_) in enumerate(
+                zip(data_frame['#id'].values, data_frame['oligomer'].values, data_frame['charge'].values)):
+            db_df_ccs = self.ccs_db_df[
+                (self.ccs_db_df['id'] == species_) & (self.ccs_db_df['n_oligomers'] == oligo_) & (
+                            self.ccs_db_df['z'] == charge_)][ccs_db_label].values[0]
+            ccs_pub.append(db_df_ccs)
 
         self.wave_height = wave_height[0]
         self.wave_velocity = wave_velocity[0]
@@ -253,12 +238,7 @@ class AssembleCalibrants(object):
         self.temp = temperature[0]
         self.twim_length = tw_length[0]
         self.edc_constant = edc[0]
-        self.species = species_id
-        self.oligomer = oligomer
-        self.mass = np.array(mass)
-        self.charge = np.array(charge)
-        self.drift_time = np.array(drift_time)
-        self.ccs = np.concatenate(ccs_pub)
+        self.ccs = np.array(ccs_pub)
         self.gas_mass = gas_mass
 
         self.mass_over_charge = self.mass / self.charge
@@ -275,13 +255,12 @@ class AssembleCalibrants(object):
         assemble_obj_fname = str(cal_input_csv_fname).split('.csv')[0] + '.assemble'
         self.assemble_cal_object_path = os.path.join(dirpath, assemble_obj_fname)
 
-
         return self
 
 
 def gen_assemble_cal_object(cal_input_file, ccs_db_file, gas_type='he'):
-    ccs_db_object = read_ccs_database(ccs_db_file)
-    assemble_cal_obj = AssembleCalibrants(cal_input_file, ccs_db_object, gas_type).gen_cal_input()
+    ccs_db_df = read_ccs_database(ccs_db_file)
+    assemble_cal_obj = AssembleCalibrants(cal_input_file, ccs_db_df, gas_type).gen_cal_input()
     save_object_to_pickle(assemble_cal_obj, assemble_cal_obj.assemble_cal_object_path)
     return assemble_cal_obj
 
@@ -318,8 +297,8 @@ def parser_commands():
 
 
 if __name__ == '__main__':
-    parser = parser_commands()
-    gen_assemble_cal_object_from_parser(parser)
+    # parser = parser_commands()
+    # gen_assemble_cal_object_from_parser(parser)
 
 
     ## examples of manual data input below
@@ -327,17 +306,16 @@ if __name__ == '__main__':
 
     # using a single input file
 
-    # ccs_db_file = r"C:\Users\sugyan\Documents\CCSCalibration\ccsdatabse_positive.csv"
-    # cal_input_file_ = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\test\cal_input_wv_300.0_wh_20.0.csv"
-    # gas_type = 'he'
+    ccs_db_file = r"CCSDatabase\ccsdatabse_positive.csv"
+    # cal_input_file_ = r"T:\Sugyan\test_varun\cal_poly3only\cal_input_wv_500.0_wh_35.0.csv"
+    # gas_type = 'n2'
     # gen_assemble_cal_object(cal_input_file_, ccs_db_file, gas_type=gas_type)
 
 
     # using a list of input files listed in a csv file. Input files are in each row
 
-    # cal_input_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\cal_input_files.csv"
-    # list_file = read_cal_input_file(cal_input_file)
-    # for file in list_file:
-    #     print(file)
-    #     gen_assemble_cal_object(file, ccs_db_file, gas_type='n2')
-    # print('heho')
+    cal_input_file = r"C:\Users\sugyan\Documents\Processed data\051819_CalProcessing\All\cal_input_files.csv"
+    list_file = read_cal_input_file(cal_input_file)
+    for file in list_file:
+        print(file)
+        gen_assemble_cal_object(file, ccs_db_file, gas_type='n2')
