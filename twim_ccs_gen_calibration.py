@@ -8,7 +8,7 @@ import sys, logging
 import optparse
 import pickle
 import twim_ccs_gen_assemble
-from twim_ccs_gen_assemble import AssembleCalibrants, CCSDatabase, save_object_to_pickle, read_cal_input_file, gen_assemble_cal_object, pressure_bar_to_pascals, calculate_mobility, calculate_number_density, mass_da_to_kg, correct_ccs, calculate_ccs, check_path_return_absolute_path
+from twim_ccs_gen_assemble import AssembleCalibrants, save_object_to_pickle, read_cal_input_file, gen_assemble_cal_object, pressure_bar_to_pascals, calculate_mobility, calculate_number_density, mass_da_to_kg, correct_ccs, calculate_ccs, check_path_return_absolute_path
 import calibration_functions
 import numpy as np
 from scipy.optimize import curve_fit, root, least_squares
@@ -79,6 +79,8 @@ def gen_calibrant_list_from_assemble_obj(assemble_obj):
     cal_list_dict['oligomer'] = assemble_obj.oligomer
     cal_list_dict['mass'] = assemble_obj.mass
     cal_list_dict['charge'] = assemble_obj.charge
+    cal_list_dict['superclass'] = assemble_obj.superclass
+    cal_list_dict['subclass'] = assemble_obj.subclass
     return cal_list_dict
 
 
@@ -965,17 +967,19 @@ def write_calibrants_output_to_csv(cal_scheme_obj):
     header_pot_factor = '#Pot_Factor,'+str(cal_scheme_obj.cal_exp_cond['pot_factor'])+'\n'
     header_wave_lambda = '#Wave_lambda,'+str(cal_scheme_obj.cal_exp_cond['wave_lambda'])+'\n'
 
-    header_ = '#id,oligomer,mass,charge,exp_avg_vel,pub_ccs,pub_corr_ccs,mobility,pred_vel,pred_ccs,pred_corr_ccs,pred_mobility,vel_deviation,' \
+    header_ = '#id,oligomer,mass,charge,superclass,subclass,exp_avg_vel,pub_ccs,pub_corr_ccs,mobility,pred_vel,pred_ccs,pred_corr_ccs,pred_mobility,vel_deviation,' \
               'ccs_deviation\n'
 
     output_string += header1 + header_wh + header_wv + header_gas_mass + header_gas_type + header_press + header_temp + header_twlength + header_edc + header_pot_factor + header_wave_lambda + header_
 
 
     for num in range(len(cal_scheme_obj.cal_calibrants['species'])):
-        line = '{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n'.format(cal_scheme_obj.cal_calibrants['species'][num],
+        line = '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n'.format(cal_scheme_obj.cal_calibrants['species'][num],
                                                               cal_scheme_obj.cal_calibrants['oligomer'][num],
                                                               cal_scheme_obj.cal_calibrants['mass'][num],
                                                               cal_scheme_obj.cal_calibrants['charge'][num],
+                                                                    cal_scheme_obj.cal_calibrants['superclass'][num],
+                                                                    cal_scheme_obj.cal_calibrants['subclass'][num],
                                                               cal_scheme_obj.cal_output['ydata'][num],
                                                               cal_scheme_obj.cal_output['pub_ccs'][num],
                                                               cal_scheme_obj.cal_output['pub_corr_ccs'][num],
@@ -1162,7 +1166,7 @@ def write_calfit_output(cal_scheme_obj):
 
 
 
-def gen_calibration_scheme(assemble_obj_file, cal_mode, fixa_blended=False):
+def gen_calibration_scheme(assemble_obj_file, cal_mode, fixa_blended=True):
     """
     generate cal scheme object and save it. generate cal ouputs and save them.
     :param assemble_obj_file: assemble file
@@ -1227,31 +1231,32 @@ def parser_commands():
 
 if __name__ == '__main__':
 
-    parser = parser_commands()
-    gen_calibration_from_parser(parser)
+    # parser = parser_commands()
+    # gen_calibration_from_parser(parser)
 
     ## examples of manual data input below
     ###
 
     # using a single input assemble file and single cal type
 
-    # assemble_file = r"C:\Users\sugyan\Documents\CCSCalibration\Calib_code_test\InputFiles\input_wv_300.0_wh_40.0.assemble"
+    # assemble_file = r"T:\Sugyan\test_varun\cal_poly3only\cal_input_wv_500.0_wh_35.0.assemble"
     # cal_scheme = gen_calibration_scheme(assemble_file, 'blended_exp')
 
 
     # using a list of cal mode list to all assemble files in a directory
 
-    # dirpath = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\test"
-    #
-    # sys.stdout = open(os.path.join(dirpath, 'gen_cal_log.txt'), 'w')
-    #
-    # file_list = os.listdir(dirpath)
-    # assemble_file_list = [x for x in file_list if x.endswith('.assemble')]
+    dirpath = r"C:\Users\sugyan\Documents\Processed data\051819_CalProcessing\All"
+
+    sys.stdout = open(os.path.join(dirpath, 'gen_cal_log.txt'), 'w')
+
+    file_list = os.listdir(dirpath)
+    assemble_file_list = [x for x in file_list if x.endswith('.assemble')]
     # cal_mode_list = ['power_law', 'power_law_exp', 'relax_true_6','relax_true_6_exp', 'blended', 'blended_exp']
-    # start_time_tot = time.perf_counter()
-    # for assemble_file in assemble_file_list:
-    #     for ind, cal_mode in enumerate(cal_mode_list):
-    #         print(assemble_file, ' ---> ', cal_mode)
-    #         scheme = gen_calibration_scheme(os.path.join(dirpath, assemble_file), cal_mode=cal_mode, fixa_blended=True)
-    # end_time_tot = time.perf_counter() - start_time_tot
-    # print('Total time took:', end_time_tot, ' seconds')
+    cal_mode_list = ['power_law', 'power_law_exp', 'blended', 'blended_exp']
+    start_time_tot = time.perf_counter()
+    for assemble_file in assemble_file_list:
+        for ind, cal_mode in enumerate(cal_mode_list):
+            print(assemble_file, ' ---> ', cal_mode)
+            scheme = gen_calibration_scheme(os.path.join(dirpath, assemble_file), cal_mode=cal_mode, fixa_blended=True)
+    end_time_tot = time.perf_counter() - start_time_tot
+    print('Total time took:', end_time_tot, ' seconds')
