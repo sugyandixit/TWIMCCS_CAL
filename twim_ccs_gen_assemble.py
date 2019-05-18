@@ -208,8 +208,16 @@ class AssembleCalibrants(object):
 
         if 'superclass' in data_frame:
             self.superclass = data_frame['superclass'].values
+        else:
+            data_frame['superclass'] = np.nan
+            self.superclass = data_frame['superclass'].values
+
         if 'subclass' in data_frame:
             self.subclass = data_frame['subclass'].values
+        else:
+            data_frame['subclass'] = np.nan
+            self.subclass = data_frame['subclass'].values
+
 
         #match ccs value and entry based on the gas type, species, oligomer, and charge
         gas_mass = 0
