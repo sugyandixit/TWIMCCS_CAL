@@ -4,6 +4,7 @@ import os
 import optparse
 import calibration_functions
 from scipy.optimize import curve_fit, root
+import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from twim_ccs_gen_calibration import CalibrationScheme, load_pickle_object, pred_mob_with_root_finding_v_blend_func, corr_ccs_to_ccs, pred_corr_ccs_with_root_finding_relax_no_relax_without_exp, pred_corr_ccs_with_root_finding_relax_with_exp, generate_cal_mode_string
@@ -30,12 +31,20 @@ def gen_assemble_uncal_dict(unk_file, cal_scheme_obj):
     unk_pred_fpath = os.path.join(dirpath, unk_pred_fname)
 
     unk_df = pd.read_csv(unk_file)
+
+    if 'superclass' not in unk_df:
+        unk_df['superclass'] = np.nan
+    if 'subclass' not in unk_df:
+        unk_df['subclass'] = np.nan
+
     assemble_uncal_dict = dict()
     uncal_id = unk_df['#id'].values
     uncal_mass = unk_df['mass'].values
     uncal_charge = unk_df['charge'].values
     uncal_dt = unk_df['dt'].values
     uncal_oligomer = unk_df['oligomer'].values
+    uncal_superclass = unk_df['superclass'].values
+    uncal_subclass = unk_df['subclass'].values
     uncal_mass_over_charge = uncal_mass/uncal_charge
     corr_dt = correct_drift_time(uncal_dt, uncal_mass_over_charge, cal_scheme_obj.cal_exp_cond['edc_constant'])
     exp_avg_vel = calculate_average_velocity(corr_dt, cal_scheme_obj.cal_exp_cond['twim_length'])
@@ -45,6 +54,8 @@ def gen_assemble_uncal_dict(unk_file, cal_scheme_obj):
     assemble_uncal_dict['oligomer'] = uncal_oligomer
     assemble_uncal_dict['mass'] = uncal_mass
     assemble_uncal_dict['charge'] = uncal_charge
+    assemble_uncal_dict['superclass'] = uncal_superclass
+    assemble_uncal_dict['subclass'] = uncal_subclass
     assemble_uncal_dict['dt'] = uncal_dt
     assemble_uncal_dict['mass_over_charge'] = uncal_mass_over_charge
     assemble_uncal_dict['corr_dt'] = corr_dt
@@ -178,15 +189,17 @@ def write_pred_output_to_csv(uncal_dict, cal_scheme_obj):
     header_pot_factor = '#Pot_Factor,' + str(cal_scheme_obj.cal_exp_cond['pot_factor']) + '\n'
     header_wave_lambda = '#Wave_lambda,' + str(cal_scheme_obj.cal_exp_cond['wave_lambda']) + '\n'
     header_ccs_rmse = '#CCS_RMSE(%),'+str(cal_scheme_obj.cal_output['ccs_rmse']) + '\n'
-    header_ = '#id,oligomer,mass,charge,dt,exp_avg_vel,pred_mob,pred_ccs\n'
+    header_ = '#id,oligomer,mass,charge,superclass,subclass,dt,exp_avg_vel,pred_mob,pred_ccs\n'
 
     output_string += header1 + header_wh + header_wv + header_gas_mass + header_gas_type + header_press + header_temp + header_twlength + header_edc + header_pot_factor + header_wave_lambda + header_ccs_rmse + header_
 
     for num in range(len(uncal_dict['id'])):
-        line = '{},{},{},{},{},{},{},{}\n'.format(uncal_dict['id'][num],
+        line = '{},{},{},{},{},{},{},{},{},{}\n'.format(uncal_dict['id'][num],
                                                uncal_dict['oligomer'][num],
                                                uncal_dict['mass'][num],
                                                uncal_dict['charge'][num],
+                                                        uncal_dict['superclass'][num],
+                                                        uncal_dict['subclass'][num],
                                                uncal_dict['dt'][num],
                                                uncal_dict['exp_avg_vel'][num],
                                                uncal_dict['pred_mob'][num],
@@ -241,8 +254,8 @@ def parser_commands():
 
 
 if __name__ == '__main__':
-    parser = parser_commands()
-    prediction_from_parser(parser)
+    # parser = parser_commands()
+    # prediction_from_parser(parser)
 
     ## examples of manual data input below
     ###
@@ -250,14 +263,14 @@ if __name__ == '__main__':
     # using a single unknown and cal object file
 
 
-    # unkfile = r"C:\Users\sugyan\Documents\CCSCalibration\Calib_code_test\InputFiles\unk_wv_300.0_wh_40.0.csv"
-    # cal_object_file = r"C:\Users\sugyan\Documents\CCSCalibration\Calib_code_test\InputFiles\nofixa_input_wv_300.0_wh_40.0_blended_True_exp_True_.cal"
-    # uncal_out = pred_ccs_(unkfile, cal_object_file)
+    unkfile = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSApolyalaz1_3\unk_input_wv_500.0_wh_35.0_GROEL68.csv"
+    cal_object_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSApolyalaz1_3\cal_input_wv_500.0_wh_35.0_power_law_True_.cal"
+    uncal_out = pred_ccs_(unkfile, cal_object_file)
     #
 
     # using a list of pair of unk file and cal object file stored in csv
 
-    # cal_predict_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSAAvidinCytc\cal_predict_files.csv"
+    # cal_predict_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSApolyalaz1_3\cal_predict_files.csv"
     # cal_predict_file_df = pd.read_csv(cal_predict_file)
     # for ind, (unkfile, cal_object_file) in enumerate(zip(cal_predict_file_df['unk_csv_fpath'].values, cal_predict_file_df['cal_obj_fpath'].values)):
     #     print(unkfile, ' -----> ', cal_object_file)
