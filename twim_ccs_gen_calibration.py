@@ -1245,7 +1245,7 @@ if __name__ == '__main__':
 
     # using a list of cal mode list to all assemble files in a directory
 
-    dirpath = r"C:\Users\sugyan\Documents\Processed data\051819_CalProcessing\All"
+    dirpath = r"C:\Users\sugyan\Documents\Processed data\051819_CalProcessing\MixClass\CalNatProtBSApolyalaz1_3_fixa"
 
     sys.stdout = open(os.path.join(dirpath, 'gen_cal_log.txt'), 'w')
 

@@ -322,7 +322,7 @@ if __name__ == '__main__':
 
     # using a list of input files listed in a csv file. Input files are in each row
 
-    cal_input_file = r"C:\Users\sugyan\Documents\Processed data\051819_CalProcessing\All\cal_input_files.csv"
+    cal_input_file = r"C:\Users\sugyan\Documents\Processed data\051819_CalProcessing\MixClass\CalNatProtBSApolyalaz1_3_fixa\cal_input_files.csv"
     list_file = read_cal_input_file(cal_input_file)
     for file in list_file:
         print(file)
