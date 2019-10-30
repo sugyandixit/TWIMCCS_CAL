@@ -1245,18 +1245,19 @@ if __name__ == '__main__':
 
     # using a list of cal mode list to all assemble files in a directory
 
-    dirpath = r"C:\Users\sugyan\Documents\Processed data\051819_CalProcessing\MixClass\CalNatProtBSApolyalaz1_3_fixa"
+    dirpath = r"C:\Users\sugyan\Documents\Processed data\092219_CalProcessing\powerlaw\smallmol\leaveonespec"
 
     sys.stdout = open(os.path.join(dirpath, 'gen_cal_log.txt'), 'w')
 
     file_list = os.listdir(dirpath)
     assemble_file_list = [x for x in file_list if x.endswith('.assemble')]
-    # cal_mode_list = ['power_law', 'power_law_exp', 'relax_true_6','relax_true_6_exp', 'blended', 'blended_exp']
-    cal_mode_list = ['power_law', 'power_law_exp', 'blended', 'blended_exp']
+    # cal_mode_list = ['power_law', 'power_law_exp', 'relax_true_6', 'relax_true_6_exp', 'blended', 'blended_exp']
+    cal_mode_list = ['power_law', 'power_law_exp']
+    # cal_mode_list = ['relax_true_6', 'relax_true_6_exp']
     start_time_tot = time.perf_counter()
     for assemble_file in assemble_file_list:
         for ind, cal_mode in enumerate(cal_mode_list):
             print(assemble_file, ' ---> ', cal_mode)
-            scheme = gen_calibration_scheme(os.path.join(dirpath, assemble_file), cal_mode=cal_mode, fixa_blended=True)
+            scheme = gen_calibration_scheme(os.path.join(dirpath, assemble_file), cal_mode=cal_mode, fixa_blended=False)
     end_time_tot = time.perf_counter() - start_time_tot
     print('Total time took:', end_time_tot, ' seconds')

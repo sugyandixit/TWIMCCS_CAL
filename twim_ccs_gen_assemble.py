@@ -315,14 +315,14 @@ if __name__ == '__main__':
     # using a single input file
 
     ccs_db_file = r"CCSDatabase\ccsdatabse_positive.csv"
-    # cal_input_file_ = r"T:\Sugyan\test_varun\cal_poly3only\cal_input_wv_500.0_wh_35.0.csv"
-    # gas_type = 'n2'
+    # cal_input_file_ = r"C:\Users\sugyan\Documents\CCSCalibration\IMSCal19-v4\test_chae_data\cal_input_wv_150_wh_15.csv"
+    # gas_type = 'he'
     # gen_assemble_cal_object(cal_input_file_, ccs_db_file, gas_type=gas_type)
 
 
     # using a list of input files listed in a csv file. Input files are in each row
 
-    cal_input_file = r"C:\Users\sugyan\Documents\Processed data\051819_CalProcessing\MixClass\CalNatProtBSApolyalaz1_3_fixa\cal_input_files.csv"
+    cal_input_file = r"C:\Users\sugyan\Documents\Processed data\092219_CalProcessing\powerlaw\smallmol\leaveonespec\cal_input_files.csv"
     list_file = read_cal_input_file(cal_input_file)
     for file in list_file:
         print(file)

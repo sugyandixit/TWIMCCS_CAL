@@ -263,14 +263,14 @@ if __name__ == '__main__':
     # using a single unknown and cal object file
 
 
-    # unkfile = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSApolyalaz1_3\unk_input_wv_500.0_wh_35.0_GROEL68.csv"
-    # cal_object_file = r"C:\Users\sugyan\Documents\Processed data\021519_CalProcessing\MixClass\CalNatProtBSApolyalaz1_3\cal_input_wv_500.0_wh_35.0_power_law_True_.cal"
+    # unkfile = r"C:\Users\sugyan\Documents\CCSCalibration\IMSCal19-v4\test_chae_data\unk_hsa+d12_from_+17data.csv"
+    # cal_object_file = r"C:\Users\sugyan\Documents\CCSCalibration\IMSCal19-v4\test_chae_data\cal_input_wv_150_wh_15_blended_True_exp_True_.cal"
     # uncal_out = pred_ccs_(unkfile, cal_object_file)
     #
 
     # using a list of pair of unk file and cal object file stored in csv
 
-    cal_predict_file = r"C:\Users\sugyan\Documents\Processed data\051819_CalProcessing\MixClass\CalNatProtBSApolyalaz1_3_fixa\cal_predict_files.csv"
+    cal_predict_file = r"C:\Users\sugyan\Documents\Processed data\092219_CalProcessing\powerlaw\smallmol\leaveonespec\cal_predict_files.csv"
     cal_predict_file_df = pd.read_csv(cal_predict_file)
     for ind, (unkfile, cal_object_file) in enumerate(zip(cal_predict_file_df['unk_csv_fpath'].values, cal_predict_file_df['cal_obj_fpath'].values)):
         print(unkfile, ' -----> ', cal_object_file)
